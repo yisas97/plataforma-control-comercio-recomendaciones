@@ -4,6 +4,7 @@ server:
 spring:
   application:
     name: plataforma-control-comercio-recomendaciones
+
   datasource:
     url: jdbc:mysql://localhost:3306/PLATAFORMA_COMERCIO_ELETRONICO_V01?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
     username: ${DB_USERNAME:root}
@@ -24,9 +25,156 @@ spring:
       host: localhost
       timeout: 2000
 
+  cache:
+    type: redis
+    redis:
+      time-to-live: 1800000
 
 ai:
   recommendation:
-    cache-duration: 3600
-    min-interactions: 3
-    similarity-threshold: 0.3
+    min-interactions: 5
+    similarity-threshold: 0.1
+    cache-duration-minutes: 30
+    model-update-interval-minutes: 5
+
+    ml:
+      enable: true
+      retrain-interval-hours: 24
+      min-training-samples: 100
+      max-embeddings-cache: 10000
+
+    algorithms:
+      random-forest:
+        enable: true
+        trees: 100
+        max-depth: 10
+      k-means:
+        enable: true
+        max-clusters: 8
+        min-cluster-size: 5
+      embeddings:
+        user-dimensions: 10
+        product-dimensions: 8
+
+    prediction:
+      confidence-threshold: 0.7
+      max-recommendations: 50
+
+    performance:
+      enable-async-training: true
+      thread-pool-size: 4
+      memory-limit-mb: 1024
+      batch-size: 1000
+
+mahout:
+  memory:
+    heap-size: 512m
+  similarity:
+    algorithm: pearson
+  neighborhood:
+    threshold: 0.1
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics,ai-model-status,ai-performance
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    pe.com.prueba.plataformacontrolcomerciorecomendaciones.service: DEBUG
+    smile: INFO
+    org.springframework.cache: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+ai-advanced:
+  training:
+    auto-retrain: true
+    retrain-threshold-interactions: 1000
+    validation-split: 0.2
+    cross-validation-folds: 5
+
+  features:
+    user-behavior-weights:
+      purchase: 5.0
+      add-to-cart: 3.0
+      view: 1.0
+      favorite: 2.5
+    temporal-decay: 0.95
+    seasonal-adjustment: true
+
+  quality:
+    min-accuracy-threshold: 0.75
+    max-training-time-minutes: 30
+    enable-early-stopping: true
+    patience-epochs: 5
+
+  segmentation:
+    segments:
+      premium-buyer:
+        min-order-value: 500
+        min-orders: 5
+      value-seeker:
+        max-avg-price: 200
+        price-sensitivity: high
+      explorer:
+        category-diversity: high
+        new-product-affinity: high
+      frequent-buyer:
+        min-monthly-orders: 3
+        loyalty-score: high
+
+optimization:
+  cache:
+    user-embeddings:
+      ttl-minutes: 120
+      max-entries: 50000
+    product-embeddings:
+      ttl-minutes: 240
+      max-entries: 100000
+    model-predictions:
+      ttl-minutes: 60
+      max-entries: 10000
+
+  thread-pool:
+    ai-training:
+      core-size: 2
+      max-size: 4
+      queue-capacity: 100
+    ai-prediction:
+      core-size: 4
+      max-size: 8
+      queue-capacity: 200
+
+metrics:
+  ai:
+    enable: true
+    export:
+      prometheus: true
+      interval: 30s
+    track:
+      - recommendation-accuracy
+      - model-training-time
+      - prediction-latency
+      - cache-hit-ratio
+      - user-satisfaction
+      - conversion-rate
+
+experimental:
+  ai:
+    enable-deep-learning: false
+    enable-neural-collaborative-filtering: false
+    enable-transformer-recommendations: false
+    enable-multi-armed-bandit: false
+    enable-reinforcement-learning: false
+
+security:
+  ai:
+    encrypt-user-data: true
+    anonymize-training-data: true
+    gdpr-compliance: true
+    data-retention-days: 365
