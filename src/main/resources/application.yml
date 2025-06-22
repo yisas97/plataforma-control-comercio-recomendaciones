@@ -1,0 +1,32 @@
+server:
+  port: 8084
+
+spring:
+  application:
+    name: plataforma-control-comercio-recomendaciones
+  datasource:
+    url: jdbc:mysql://localhost:3306/PLATAFORMA_COMERCIO_ELETRONICO_V01?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:52254425}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+
+  data:
+    redis:
+      port: 6379
+      host: localhost
+      timeout: 2000
+
+
+ai:
+  recommendation:
+    cache-duration: 3600
+    min-interactions: 3
+    similarity-threshold: 0.3
