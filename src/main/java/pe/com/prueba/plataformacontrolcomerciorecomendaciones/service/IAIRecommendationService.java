@@ -26,5 +26,8 @@ public interface IAIRecommendationService
     public void trackUserInteraction(InteractionRequest request);
 
     public Map<String, Object> analyzeUserProfile(Long userId);
+    public Long getTotalInteractionsByType(Long userId, String actionType);
+
+    public String getMostFrequentCategory(Long userId);
 
 }

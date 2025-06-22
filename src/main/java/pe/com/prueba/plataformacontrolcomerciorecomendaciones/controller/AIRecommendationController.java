@@ -62,15 +62,6 @@ public class AIRecommendationController
         return ResponseEntity.ok("Interaction tracked successfully");
     }
 
-    @GetMapping("/profile/{userId}")
-    public ResponseEntity<Map<String, Object>> getUserProfile(
-            @PathVariable Long userId)
-    {
-        Map<String, Object> profile = aiRecommendationService.analyzeUserProfile(
-                userId);
-        return ResponseEntity.ok(profile);
-    }
-
     @GetMapping("/recommendations/popular")
     public ResponseEntity<List<ProductRecommendation>> getPopularRecommendations(
             @RequestParam(defaultValue = "10") int limit)
@@ -86,4 +77,23 @@ public class AIRecommendationController
     {
         return ResponseEntity.ok("AI Recommendation Service is running");
     }
+
+    @GetMapping("/profile/{userId}")
+    public ResponseEntity<Map<String, Object>> getUserProfile(@PathVariable Long userId) {
+        Map<String, Object> profile = aiRecommendationService.analyzeUserProfile(userId);
+
+        // Enriquecer con estadísticas adicionales
+        Long totalViews = aiRecommendationService.getTotalInteractionsByType(userId, "VIEW");
+        Long totalPurchases = aiRecommendationService.getTotalInteractionsByType(userId, "PURCHASE");
+        Long totalCartAdds = aiRecommendationService.getTotalInteractionsByType(userId, "ADD_TO_CART");
+        String favoriteCategory = aiRecommendationService.getMostFrequentCategory(userId);
+
+        profile.put("totalViews", totalViews);
+        profile.put("totalPurchases", totalPurchases);
+        profile.put("totalCartAdds", totalCartAdds);
+        profile.put("favoriteCategory", favoriteCategory);
+
+        return ResponseEntity.ok(profile);
+    }
+
 }

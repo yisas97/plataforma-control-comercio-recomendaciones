@@ -1,7 +1,7 @@
 package pe.com.prueba.plataformacontrolcomerciorecomendaciones.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class AIRecommendationService implements IAIRecommendationService
 {
 
@@ -41,6 +42,11 @@ public class AIRecommendationService implements IAIRecommendationService
     {
         List<UserInteraction> userInteractions = interactionRepository.findByUserIdOrderByCreatedAtDesc(
                 userId);
+
+        log.info("Generating Recommendations for " + userInteractions.size() + " users");
+        for (UserInteraction userInteraction : userInteractions) {
+            log.info("UserInteraction: " + userInteraction.getId());
+        }
 
         if (userInteractions.size() < minInteractionsForPersonalized)
         {
@@ -82,7 +88,6 @@ public class AIRecommendationService implements IAIRecommendationService
                 pageable);
     }
 
-    @Cacheable("popularRecommendations")
     public List<ProductRecommendation> getPopularityBasedRecommendations(
             int limit)
     {
@@ -189,12 +194,38 @@ public class AIRecommendationService implements IAIRecommendationService
     private List<String> getPreferredCategories(Long userId)
     {
         Pageable pageable = PageRequest.of(0, 5);
-        return interactionRepository.findPreferredCategories(userId, pageable);
+        return interactionRepository.findTopCategoriesByUser(userId, pageable);
     }
 
     private double calculateAverageSpending(Long userId)
     {
         Double result = interactionRepository.findAverageSpending(userId);
         return result != null ? result : 0.0;
+    }
+
+
+    public Long getTotalInteractionsByType(Long userId, String actionType) {
+        String sql = "SELECT COUNT(*) FROM user_interactions WHERE user_id = ? AND action_type = ?";
+        return jdbcTemplate.queryForObject(sql, Long.class, userId, actionType);
+    }
+
+    public String getMostFrequentCategory(Long userId) {
+        String sql = """
+        SELECT c.name
+        FROM user_interactions ui
+        JOIN product p ON ui.product_id = p.id
+        JOIN product_categories pc ON p.id = pc.product_id
+        JOIN categories c ON pc.category_id = c.id
+        WHERE ui.user_id = ?
+        GROUP BY c.name
+        ORDER BY COUNT(*) DESC
+        LIMIT 1
+        """;
+
+        try {
+            return jdbcTemplate.queryForObject(sql, String.class, userId);
+        } catch (Exception e) {
+            return "Sin datos";
+        }
     }
 }

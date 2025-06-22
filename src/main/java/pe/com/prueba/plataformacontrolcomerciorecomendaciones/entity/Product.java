@@ -32,4 +32,7 @@ public class Product
 
     @Column(name = "producer_id")
     private Long producerId;
+
+    @Column(name = "quantity")
+    private Integer quantity;
 }
