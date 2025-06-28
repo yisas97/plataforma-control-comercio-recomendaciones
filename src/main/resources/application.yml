@@ -32,7 +32,7 @@ spring:
 
 ai:
   recommendation:
-    min-interactions: 5
+    min-interactions: 3
     similarity-threshold: 0.1
     cache-duration-minutes: 30
     model-update-interval-minutes: 5
