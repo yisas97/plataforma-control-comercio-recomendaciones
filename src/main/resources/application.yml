@@ -6,9 +6,9 @@ spring:
     name: plataforma-control-comercio-recomendaciones
 
   datasource:
-    url: jdbc:mysql://localhost:3306/PLATAFORMA_COMERCIO_ELETRONICO_V01?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-    username: ${DB_USERNAME:root}
-    password: ${DB_PASSWORD:52254425}
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
@@ -21,8 +21,8 @@ spring:
 
   data:
     redis:
-      port: 6379
-      host: localhost
+      port: ${REDIS_PORT}
+      host: ${REDIS_HOST}
       timeout: 2000
 
   cache:
